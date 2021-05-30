@@ -27,7 +27,9 @@ describe("rankings", () => {
   describe("with invalid query parameter", () => {
     beforeAll(async () => {
       const request = await to.object(
-        instance.get(`${REMOTE_API_URL}/rankings?name=a`)
+        instance.get(
+          `${REMOTE_API_URL}/rankings?country=Australia&year=2020&name=a`
+        )
       );
       return (response = request.resolve
         ? request.resolve
@@ -40,6 +42,8 @@ describe("rankings", () => {
       expect(response.statusText).toBe("Bad Request"));
     test("should contain message property", () =>
       expect(response.data).toHaveProperty("message"));
+    test("should be an object result", () =>
+      expect(response.data).toBeInstanceOf(Object));
   });
 
   describe("country with invalid name", () => {
@@ -62,9 +66,11 @@ describe("rankings", () => {
       expect(response.data.error).toBe(true));
     test("should contain message property", () =>
       expect(response.data).toHaveProperty("message"));
+    test("should be an object result", () =>
+      expect(response.data).toBeInstanceOf(Object));
   });
 
-  describe("year with invalid format", () => {
+  describe("year with lets in year format", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/rankings?year=twentytwenty`)
@@ -82,9 +88,11 @@ describe("rankings", () => {
       expect(response.data.error).toBe(true));
     test("should contain message property", () =>
       expect(response.data).toHaveProperty("message"));
+    test("should be an object result", () =>
+      expect(response.data).toBeInstanceOf(Object));
   });
 
-  describe("with no parameter", () => {
+  describe("with no query parameters", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/rankings`)
@@ -98,6 +106,10 @@ describe("rankings", () => {
       expect(response.status).toBe(200));
     test("should return status OK", () =>
       expect(response.statusText).toBe("OK"));
+    test("should return an array", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should return 935 results", () =>
+      expect(response.data.length).toBe(935));
     test("should contain correct first country property", () =>
       expect(response.data[0].country).toBe("Finland"));
     test("should contain correct first rank property", () =>
@@ -122,6 +134,9 @@ describe("rankings", () => {
       expect(response.status).toBe(200));
     test("should return status OK", () =>
       expect(response.statusText).toBe("OK"));
+    test("should return an array", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should return an array", () => expect(response.data.length).toBe(6));
     test("should contain correct first country property", () =>
       expect(response.data[0].country).toBe("Australia"));
     test("should contain correct first rank property", () =>
@@ -130,6 +145,23 @@ describe("rankings", () => {
       expect(response.data[0].score).toBe("7.223"));
     test("should contain correct first year property", () =>
       expect(response.data[0].year).toBe(2020));
+  });
+
+  describe("with country that doesn't exist", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/rankings?country=NotARealCountry`)
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 200", () =>
+      expect(response.status).toBe(200));
+    test("should return an array", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should return 0 results", () => expect(response.data.length).toBe(0));
   });
 
   describe("with valid year query parameter", () => {
@@ -155,395 +187,46 @@ describe("rankings", () => {
     test("should contain correct first year property", () =>
       expect(response.data[0].year).toBe(2015));
   });
+
+  describe("with country that doesn't exist", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/rankings?year=2000`)
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 200", () =>
+      expect(response.status).toBe(200));
+    test("should return an array", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should return 0 results", () => expect(response.data.length).toBe(0));
+  });
+
+  describe("with country and year parameters", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/rankings?&year=2019&country=Australia`)
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 200", () =>
+      expect(response.status).toBe(200));
+    test("should return an array", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should return 0 results", () => expect(response.data.length).toBe(1));
+    test("should contain correct  country property", () =>
+      expect(response.data[0].country).toBe("Australia"));
+    test("should contain correct  rank property", () =>
+      expect(response.data[0].rank).toBe(11));
+    test("should contain correct  score property", () =>
+      expect(response.data[0].score).toBe("7.228"));
+    test("should contain correct  year property", () =>
+      expect(response.data[0].year).toBe(2019));
+  });
 });
-
-// describe("specific stocks", () => {
-//   describe("with invalid query parameters", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.get(
-//           `${REMOTE_API_URL}/stocks/AAL?from=2020-03-13T00:00:00.000Z&to=2020-03-20T00:00:00.000Z`
-//         )
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 400", () =>
-//       expect(response.status).toBe(400));
-//     test("should return status text - Bad Request", () =>
-//       expect(response.statusText).toBe("Bad Request"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with unknown stock symbol", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.get(`${REMOTE_API_URL}/stocks/AALA`)
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 404", () =>
-//       expect(response.status).toBe(404));
-//     test("should return status text - Not Found", () =>
-//       expect(response.statusText).toBe("Not Found"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with a correctly formatted parameter", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.get(`${REMOTE_API_URL}/stocks/AAL`)
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 200", () =>
-//       expect(response.status).toBe(200));
-//     test("should return status OK", () =>
-//       expect(response.statusText).toBe("OK"));
-//     test("should contain correct name property", () =>
-//       expect(response.data.name).toBe("American Airlines Group"));
-//     test("should contain correct symbol property", () =>
-//       expect(response.data.symbol).toBe("AAL"));
-//     test("should contain correct industry property", () =>
-//       expect(response.data.industry).toBe("Industrials"));
-//     test("should contain correct timestamp property", () =>
-//       expect(response.data.timestamp).toBe("2020-03-23T14:00:00.000Z"));
-//     test("should contain correct open property", () =>
-//       expect(response.data.open).toBe(10.9));
-//     test("should contain correct high property", () =>
-//       expect(response.data.high).toBe(11.36));
-//     test("should contain correct low property", () =>
-//       expect(response.data.low).toBe(10.01));
-//     test("should contain correct close property", () =>
-//       expect(response.data.close).toBe(10.25));
-//     test("should contain correct volumes property", () =>
-//       expect(response.data.volumes).toBe(55494100));
-//   });
-// });
-
-// describe("user", () => {
-//   describe("registration", () => {
-//     describe("with missing email", () => {
-//       beforeAll(async () => {
-//         const request = await to.object(
-//           instance.post(`${REMOTE_API_URL}/user/register`, {
-//             password: PASSWORD,
-//           })
-//         );
-//         return (response = request.resolve
-//           ? request.resolve
-//           : request.reject.response);
-//       });
-//       test("should return status code 400", () =>
-//         expect(response.status).toBe(400));
-//       test("should return status text - Bad Request", () =>
-//         expect(response.statusText).toBe("Bad Request"));
-//       test("should contain message property", () =>
-//         expect(response.data).toHaveProperty("message"));
-//     });
-
-//     describe("with missing password", () => {
-//       beforeAll(async () => {
-//         const request = await to.object(
-//           instance.post(`${REMOTE_API_URL}/user/register`, { email: EMAIL })
-//         );
-//         return (response = request.resolve
-//           ? request.resolve
-//           : request.reject.response);
-//       });
-//       test("should return status code 400", () =>
-//         expect(response.status).toBe(400));
-//       test("should return status text - Bad Request", () =>
-//         expect(response.statusText).toBe("Bad Request"));
-//       test("should contain message property", () =>
-//         expect(response.data).toHaveProperty("message"));
-//     });
-
-//     describe("with missing email and password", () => {
-//       beforeAll(async () => {
-//         const request = await to.object(
-//           instance.post(`${REMOTE_API_URL}/user/register`, {})
-//         );
-//         return (response = request.resolve
-//           ? request.resolve
-//           : request.reject.response);
-//       });
-//       test("should return status code 400", () =>
-//         expect(response.status).toBe(400));
-//       test("should return status text - Bad Request", () =>
-//         expect(response.statusText).toBe("Bad Request"));
-//       test("should contain message property", () =>
-//         expect(response.data).toHaveProperty("message"));
-//     });
-
-//     describe("with valid email and password", () => {
-//       beforeAll(async () => {
-//         const request = await to.object(
-//           instance.post(`${REMOTE_API_URL}/user/register`, {
-//             email: EMAIL,
-//             password: PASSWORD,
-//           })
-//         );
-//         return (response = request.resolve
-//           ? request.resolve
-//           : request.reject.response);
-//       });
-
-//       test("should return status code 201", () =>
-//         expect(response.status).toBe(201));
-//       test("should return status text - Created", () =>
-//         expect(response.statusText).toBe("Created"));
-//       test("should contain message property", () =>
-//         expect(response.data).toHaveProperty("message"));
-//     });
-//   });
-// });
-
-// describe("login", () => {
-//   describe("with missing email", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.post(`${REMOTE_API_URL}/user/login`, { password: PASSWORD })
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-//     test("should return status code 400", () =>
-//       expect(response.status).toBe(400));
-//     test("should return status text - Created", () =>
-//       expect(response.statusText).toBe("Bad Request"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with missing password", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.post(`${REMOTE_API_URL}/user/login`, { email: EMAIL })
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-//     test("should return status code 400", () =>
-//       expect(response.status).toBe(400));
-//     test("should return status text - Created", () =>
-//       expect(response.statusText).toBe("Bad Request"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with non-existing user (email)", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.post(`${REMOTE_API_URL}/user/login`, {
-//           email: `${uuid()}@fake-email.com`,
-//           password: PASSWORD,
-//         })
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 401", () =>
-//       expect(response.status).toBe(401));
-//     test("should return status text - Created", () =>
-//       expect(response.statusText).toBe("Unauthorized"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with invalid password", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.post(`${REMOTE_API_URL}/user/login`, {
-//           email: EMAIL,
-//           password: "PASSWORD",
-//         })
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 401", () =>
-//       expect(response.status).toBe(401));
-//     test("should return status text - Created", () =>
-//       expect(response.statusText).toBe("Unauthorized"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with valid email and password", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.post(`${REMOTE_API_URL}/user/login`, {
-//           email: EMAIL,
-//           password: PASSWORD,
-//         })
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 200", () =>
-//       expect(response.status).toBe(200));
-//     test("should return status text - OK", () =>
-//       expect(response.statusText).toBe("OK"));
-//     test("should contain token property", () =>
-//       expect(response.data).toHaveProperty("token"));
-//     test("should contain token_type property", () =>
-//       expect(response.data).toHaveProperty("token_type"));
-//     test("should contain expires_in property", () =>
-//       expect(response.data).toHaveProperty("expires_in"));
-//     test("should contain correct token_type", () =>
-//       expect(response.data.token_type).toBe(`Bearer`));
-//     test("should contain correct expires_in", () =>
-//       expect(response.data.expires_in).toBe(86400));
-//   });
-// });
-
-// describe("authorised route", () => {
-//   beforeAll(async () => {
-//     const login = await axios.post(`${REMOTE_API_URL}/user/login`, {
-//       email: EMAIL,
-//       password: PASSWORD,
-//     });
-//     TOKEN = login.data.token;
-//   });
-//   describe("with invalid paramaters/data format", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.get(
-//           `${REMOTE_API_URL}/stocks/authed/AAL?begin=2020-03-15T00%3A00%3A00.000Z&until=2020-03-20T00%3A00%3A00.000Z`,
-//           { headers: { Authorization: `Bearer ${TOKEN}` } }
-//         )
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 400", () =>
-//       expect(response.status).toBe(400));
-//     test("should return status text - Bad Request", () =>
-//       expect(response.statusText).toBe("Bad Request"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with no authorisation header", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.get(
-//           `${REMOTE_API_URL}/stocks/authed/AAL?from=2020-03-15T00%3A00%3A00.000Z&until=2020-03-20T00%3A00%3A00.000Z`
-//         )
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 403", () =>
-//       expect(response.status).toBe(403));
-//     test("should return status text - Forbidden", () =>
-//       expect(response.statusText).toBe("Forbidden"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with out of bounds dates", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.get(
-//           `${REMOTE_API_URL}/stocks/authed/AAL?from=2020-04-15T00%3A00%3A00.000Z&to=2020-05-20T00%3A00%3A00.000Z`,
-//           { headers: { Authorization: `Bearer ${TOKEN}` } }
-//         )
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 404", () =>
-//       expect(response.status).toBe(404));
-//     test("should return status text - Not Found", () =>
-//       expect(response.statusText).toBe("Not Found"));
-//     test("should contain message property", () =>
-//       expect(response.data).toHaveProperty("message"));
-//   });
-
-//   describe("with correctly formated query and authorization header", () => {
-//     beforeAll(async () => {
-//       const request = await to.object(
-//         instance.get(
-//           `${REMOTE_API_URL}/stocks/authed/AAL?from=2020-03-15T00%3A00%3A00.000Z&to=2020-03-20T00%3A00%3A00.000Z`,
-//           { headers: { Authorization: `Bearer ${TOKEN}` } }
-//         )
-//       );
-//       return (response = request.resolve
-//         ? request.resolve
-//         : request.reject.response);
-//     });
-
-//     test("should return status code 200", () =>
-//       expect(response.status).toBe(200));
-//     test("should return status text - OK", () =>
-//       expect(response.statusText).toBe("OK"));
-//     test("should contain correct -to- date", () =>
-//       expect(response.data[0].timestamp).toBe(`2020-03-19T14:00:00.000Z`));
-//     test("should contain correct -to- symbol", () =>
-//       expect(response.data[0].symbol).toBe("AAL"));
-//     test("should contain correct -to- name property", () =>
-//       expect(response.data[0].name).toBe("American Airlines Group"));
-//     test("should contain correct -to- industry property", () =>
-//       expect(response.data[0].industry).toBe("Industrials"));
-//     test("should contain correct -to- open property", () =>
-//       expect(response.data[0].open).toBe(11.6));
-//     test("should contain correct -to- high property", () =>
-//       expect(response.data[0].high).toBe(12.16));
-//     test("should contain correct -to- low property", () =>
-//       expect(response.data[0].low).toBe(10.01));
-//     test("should contain correct -to- close property", () =>
-//       expect(response.data[0].close).toBe(10.29));
-//     test("should contain correct -to- volumes property", () =>
-//       expect(response.data[0].volumes).toBe(71584500));
-//     test("should contain correct -from- date", () =>
-//       expect(response.data[response.data.length - 1].timestamp).toBe(
-//         `2020-03-15T14:00:00.000Z`
-//       ));
-//     test("should contain correct -from- symbol", () =>
-//       expect(response.data[response.data.length - 1].symbol).toBe("AAL"));
-//     test("should contain correct -from- name property", () =>
-//       expect(response.data[response.data.length - 1].name).toBe(
-//         "American Airlines Group"
-//       ));
-//     test("should contain correct -from- industry property", () =>
-//       expect(response.data[response.data.length - 1].industry).toBe(
-//         "Industrials"
-//       ));
-//     test("should contain correct -from- open property", () =>
-//       expect(response.data[response.data.length - 1].open).toBe(15.3));
-//     test("should contain correct -from- high property", () =>
-//       expect(response.data[response.data.length - 1].high).toBe(15.6));
-//     test("should contain correct -from- low property", () =>
-//       expect(response.data[response.data.length - 1].low).toBe(13.12));
-//     test("should contain correct -from- close property", () =>
-//       expect(response.data[response.data.length - 1].close).toBe(14.31));
-//     test("should contain correct -from- volumes property", () =>
-//       expect(response.data[response.data.length - 1].volumes).toBe(58376100));
-//   });
-// });
