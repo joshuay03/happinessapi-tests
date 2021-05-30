@@ -415,3 +415,35 @@ describe("login", () => {
       expect(response.data.expires_in).toBe(86400));
   });
 });
+
+describe("factors", () => {
+  beforeAll(async () => {
+    const login = await axios.post(`${REMOTE_API_URL}/user/login`, {
+      email: EMAIL,
+      password: PASSWORD,
+    });
+    TOKEN = login.data.token;
+  });
+
+  describe("with no authorisation header", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/factors/2020`)
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 401", () =>
+      expect(response.status).toBe(401));
+    test("should return status text - Unauthorized", () =>
+      expect(response.statusText).toBe("Unauthorized"));
+    test("should return error with boolean of true", () =>
+      expect(response.data.error).toBe(true));
+    test("should contain message property", () =>
+      expect(response.data).toHaveProperty("message"));
+    test("should be an object result", () =>
+      expect(response.data).toBeInstanceOf(Object));
+  });
+});
