@@ -11,7 +11,7 @@ const to = require("./lib/to");
 const https = require("https");
 
 //If you are serving your server on any port other than 3000, change the port here, or alternatively change the url to approriate
-const REMOTE_API_URL = `http://localhost:3000`;
+const REMOTE_API_URL = `http://localhost:3002`;
 const EMAIL = `${uuid()}@fake-email.com`;
 const PASSWORD = "webcomputing";
 let TOKEN = "";
@@ -469,7 +469,107 @@ describe("factors", () => {
       expect(response.data.error).toBe(true));
     test("should contain message property", () =>
       expect(response.data).toHaveProperty("message"));
+    test("should contain message property", () =>
+      expect(response.data.message).toBe(
+        "Authorization header ('Bearer token') not found"
+      ));
     test("should be an object result", () =>
       expect(response.data).toBeInstanceOf(Object));
+  });
+
+  describe("with invalid bearer token", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/factors/2020`, {
+          headers: { Authorization: `Bearer notARealToken` },
+        })
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 401", () =>
+      expect(response.status).toBe(401));
+    test("should return status text - Unauthorized", () =>
+      expect(response.statusText).toBe("Unauthorized"));
+    test("should return error with boolean of true", () =>
+      expect(response.data.error).toBe(true));
+    test("should contain message property", () =>
+      expect(response.data).toHaveProperty("message"));
+    test("should contain message property", () =>
+      expect(response.data.message).toBe("Invalid JWT token"));
+    test("should be an object result", () =>
+      expect(response.data).toBeInstanceOf(Object));
+  });
+
+  describe("with malformed bearer token", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/factors/2020`, {
+          headers: { Authorization: `notBearer ` },
+        })
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 401", () =>
+      expect(response.status).toBe(401));
+    test("should return status text - Unauthorized", () =>
+      expect(response.statusText).toBe("Unauthorized"));
+    test("should return error with boolean of true", () =>
+      expect(response.data.error).toBe(true));
+    test("should contain message property", () =>
+      expect(response.data).toHaveProperty("message"));
+    test("should contain message property", () =>
+      expect(response.data.message).toBe("Authorization header is malformed"));
+    test("should be an object result", () =>
+      expect(response.data).toBeInstanceOf(Object));
+  });
+
+  describe("with valid auth - year that does not exist (2000) in data set", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/factors/2000`, {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        })
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 200", () =>
+      expect(response.status).toBe(200));
+    test("should return status text - OK", () =>
+      expect(response.statusText).toBe("OK"));
+    test("should be an array result", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should return empty array", () =>
+      expect(response.data.length).toBe(0));
+  });
+
+  describe("with valid auth - year that does exist (2020), country that does not exist (notARealCountry) in data set", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/factors/2020?country=notARealCountry`, {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        })
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 200", () =>
+      expect(response.status).toBe(200));
+    test("should return status text - OK", () =>
+      expect(response.statusText).toBe("OK"));
+    test("should be an array result", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should return empty array", () =>
+      expect(response.data.length).toBe(0));
   });
 });
