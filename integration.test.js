@@ -23,6 +23,32 @@ const instance = axios.create({
   }),
 });
 
+describe("countries", () => {
+  describe("with no query parmater", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/countries`)
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("return a list of all countries", () =>
+      expect(response.status).toBe(200));
+    test("should return status text - OK", () =>
+      expect(response.statusText).toBe("OK"));
+    test("should return an array", () =>
+      expect(response.data).toBeInstanceOf(Array));
+    test("should contain 167 countries", () =>
+      expect(response.data.length).toBe(167));
+    test("should have first country of Afghanistan", () =>
+      expect(response.data[0]).toBe("Afghanistan"));
+    test("should have last country of Zimbabwe", () =>
+      expect(response.data[166]).toBe("Zimbabwe"));
+  });
+});
+
 describe("rankings", () => {
   describe("with invalid query parameter", () => {
     beforeAll(async () => {
