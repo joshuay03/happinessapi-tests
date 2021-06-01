@@ -77,9 +77,7 @@ describe("rankings", () => {
   describe("country with invalid name", () => {
     beforeAll(async () => {
       const request = await to.object(
-        instance.get(
-          `${REMOTE_API_URL}/rankings?country=industry=country_that_doesn't exist`
-        )
+        instance.get(`${REMOTE_API_URL}/rankings?country=Austral1a`)
       );
       return (response = request.resolve
         ? request.resolve
