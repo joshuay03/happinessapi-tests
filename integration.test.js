@@ -683,6 +683,30 @@ describe("factors", () => {
       expect(response.data).toBeInstanceOf(Object));
   });
 
+  describe("with valid auth - valid year and invalid country format", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/factors/2020?country=Austral1a`, {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        })
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("should return status code 400", () =>
+      expect(response.status).toBe(400));
+    test("should return status text - Bad Request", () =>
+      expect(response.statusText).toBe("Bad Request"));
+    test("should return error with boolean of true", () =>
+      expect(response.data.error).toBe(true));
+    test("should contain message property", () =>
+      expect(response.data).toHaveProperty("message"));
+    test("should be an object result", () =>
+      expect(response.data).toBeInstanceOf(Object));
+  });
+
   describe("with valid auth - provided limit of 10", () => {
     beforeAll(async () => {
       const request = await to.object(
