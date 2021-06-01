@@ -18,7 +18,7 @@ const REMOTE_API_URL = `http://localhost:3000`;
 
 ## After each run
 
-After each run, you will see output on the screen, but if there are a number of errors you will find it easier to browse the `report.html` file which will appear in the top directory. This will give you a good idea of how your server is behaving. Ideally you'd want to see all 93 tests passing. If you aren't sure what is going wrong, have a look at the messages and then dig directly into the code itself - the file `integration.tests.js`. If you are unsure of the behaviour, look at the Swagger or hit the endpoint with postman to debug. An example version of this file - `example.html` - may be found in the top directory.
+After each run, you will see output on the screen, but if there are a number of errors you will find it easier to browse the `report.html` file which will appear in the top directory. This will give you a good idea of how your server is behaving. Ideally you'd want to see all 167 (more to come!) tests passing. If you aren't sure what is going wrong, have a look at the messages and then dig directly into the code itself - the file `integration.tests.js`. If you are unsure of the behaviour, look at the Swagger or hit the endpoint with postman to debug. An example version of this file - `example.html` - may be found in the top directory.
 
 ## Some more detail
 
@@ -57,4 +57,4 @@ and so on. The giveaway is the `expect().toBe()` which makes it clear that we ha
 
 ## Will they change?
 
-We will not introduce other test conditions. We reserve the right to change the data. So, for example, most of these tests use the country of `Finland`. We might decide to change to another Australia. The tests will use different data, but they will be testing the same thing. If you hardcode your responses, we will find out and we won't be impressed. If you can pass these tests legitimately, then you will be fine.
+We will not introduce other test conditions. We reserve the right to change the data. So, for example, many of these tests use the country of `Finland` or `Australia`. We might decide to change to another country or year. The tests will use different data, but they will be testing the same thing. If you hardcode your responses, we will find out and we won't be impressed. If you can pass these tests legitimately, then you will be fine.
