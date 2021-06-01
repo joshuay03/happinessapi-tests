@@ -725,7 +725,7 @@ describe("factors", () => {
       expect(response.statusText).toBe("OK"));
     test("should be an array result", () =>
       expect(response.data).toBeInstanceOf(Array));
-    test("should return array of 156 results", () =>
+    test("should return array of 10 results", () =>
       expect(response.data.length).toBe(10));
   });
 
