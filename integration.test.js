@@ -13,7 +13,7 @@ const faker = require("faker");
 const { DateTime } = require("luxon");
 
 //If you are serving your server on any port other than 3000, change the port here, or alternatively change the url to approriate
-const REMOTE_API_URL = `http://131.181.190.87:3002`;
+const REMOTE_API_URL = `http://localhost:3000`;
 
 const EMAIL_USER_ONE = `${uuid()}@fake-email.com`;
 const PASSWORD_USER_ONE = "webcomputing";
