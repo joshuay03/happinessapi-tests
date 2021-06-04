@@ -88,9 +88,7 @@ describe("rankings", () => {
   describe("country with invalid name", () => {
     beforeAll(async () => {
       const request = await to.object(
-        instance.get(
-          `${REMOTE_API_URL}/rankings?country=industry=country_that_doesn't exist`
-        )
+        instance.get(`${REMOTE_API_URL}/rankings?country=Austral1a`)
       );
       return (response = request.resolve
         ? request.resolve
@@ -488,7 +486,7 @@ describe("factors", () => {
       expect(response.data.error).toBe(true));
     test("should contain message property", () =>
       expect(response.data).toHaveProperty("message"));
-    test("should contain message property", () =>
+    test("should contain specific message for 'Authorization header ('Bearer token') not found", () =>
       expect(response.data.message).toBe(
         "Authorization header ('Bearer token') not found"
       ));
@@ -651,7 +649,7 @@ describe("factors", () => {
       expect(response.statusText).toBe("OK"));
     test("should be an array result", () =>
       expect(response.data).toBeInstanceOf(Array));
-    test("should return array of 156 results", () =>
+    test("should return array of 1 results", () =>
       expect(response.data.length).toBe(1));
 
     test("should contain correct first rank property", () =>
@@ -740,7 +738,7 @@ describe("factors", () => {
       expect(response.statusText).toBe("OK"));
     test("should be an array result", () =>
       expect(response.data).toBeInstanceOf(Array));
-    test("should return array of 156 results", () =>
+    test("should return array of 10 results", () =>
       expect(response.data.length).toBe(10));
   });
 
