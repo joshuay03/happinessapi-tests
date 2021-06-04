@@ -9,12 +9,23 @@ const axios = require("axios");
 const { v4: uuid } = require("uuid");
 const to = require("./lib/to");
 const https = require("https");
+const faker = require("faker");
+const { DateTime } = require("luxon");
 
 //If you are serving your server on any port other than 3000, change the port here, or alternatively change the url to approriate
 const REMOTE_API_URL = `http://localhost:3000`;
-const EMAIL = `${uuid()}@fake-email.com`;
-const PASSWORD = "webcomputing";
-let TOKEN = "";
+
+const EMAIL_USER_ONE = `${uuid()}@fake-email.com`;
+const PASSWORD_USER_ONE = "webcomputing";
+let TOKEN_USER_ONE = "";
+let FIRST_NAME_USER_ONE = faker.name.firstName();
+let LAST_NAME_USER_ONE = faker.name.lastName();
+let ADDRESS_USER_ONE = faker.address.streetAddress();
+let DOB_USER_ONE = DateTime.fromJSDate(faker.date.past()).toISODate();
+
+const EMAIL_USER_TWO = `${uuid()}@fake-email.com`;
+const PASSWORD_USER_TWO = "webcomputing";
+let TOKEN_USER_TWO = "";
 
 https.globalAgent.options.rejectUnauthorized = false;
 const instance = axios.create({
@@ -264,7 +275,7 @@ describe("user", () => {
       beforeAll(async () => {
         const request = await to.object(
           instance.post(`${REMOTE_API_URL}/user/register`, {
-            password: PASSWORD,
+            password: PASSWORD_USER_ONE,
           })
         );
         return (response = request.resolve
@@ -282,7 +293,9 @@ describe("user", () => {
     describe("with missing password", () => {
       beforeAll(async () => {
         const request = await to.object(
-          instance.post(`${REMOTE_API_URL}/user/register`, { email: EMAIL })
+          instance.post(`${REMOTE_API_URL}/user/register`, {
+            email: EMAIL_USER_ONE,
+          })
         );
         return (response = request.resolve
           ? request.resolve
@@ -317,8 +330,8 @@ describe("user", () => {
       beforeAll(async () => {
         const request = await to.object(
           instance.post(`${REMOTE_API_URL}/user/register`, {
-            email: EMAIL,
-            password: PASSWORD,
+            email: EMAIL_USER_ONE,
+            password: PASSWORD_USER_ONE,
           })
         );
         return (response = request.resolve
@@ -340,7 +353,9 @@ describe("login", () => {
   describe("with missing email", () => {
     beforeAll(async () => {
       const request = await to.object(
-        instance.post(`${REMOTE_API_URL}/user/login`, { password: PASSWORD })
+        instance.post(`${REMOTE_API_URL}/user/login`, {
+          password: PASSWORD_USER_ONE,
+        })
       );
       return (response = request.resolve
         ? request.resolve
@@ -357,7 +372,7 @@ describe("login", () => {
   describe("with missing password", () => {
     beforeAll(async () => {
       const request = await to.object(
-        instance.post(`${REMOTE_API_URL}/user/login`, { email: EMAIL })
+        instance.post(`${REMOTE_API_URL}/user/login`, { email: EMAIL_USER_ONE })
       );
       return (response = request.resolve
         ? request.resolve
@@ -376,7 +391,7 @@ describe("login", () => {
       const request = await to.object(
         instance.post(`${REMOTE_API_URL}/user/login`, {
           email: `${uuid()}@fake-email.com`,
-          password: PASSWORD,
+          password: PASSWORD_USER_ONE,
         })
       );
       return (response = request.resolve
@@ -396,8 +411,8 @@ describe("login", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.post(`${REMOTE_API_URL}/user/login`, {
-          email: EMAIL,
-          password: "PASSWORD",
+          email: EMAIL_USER_ONE,
+          password: "PASSWORD_USER_ONE",
         })
       );
       return (response = request.resolve
@@ -417,8 +432,8 @@ describe("login", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.post(`${REMOTE_API_URL}/user/login`, {
-          email: EMAIL,
-          password: PASSWORD,
+          email: EMAIL_USER_ONE,
+          password: PASSWORD_USER_ONE,
         })
       );
       return (response = request.resolve
@@ -447,10 +462,10 @@ describe("login", () => {
 describe("factors", () => {
   beforeAll(async () => {
     const login = await axios.post(`${REMOTE_API_URL}/user/login`, {
-      email: EMAIL,
-      password: PASSWORD,
+      email: EMAIL_USER_ONE,
+      password: PASSWORD_USER_ONE,
     });
-    TOKEN = login.data.token;
+    TOKEN_USER_ONE = login.data.token;
   });
 
   describe("with no authorisation header", () => {
@@ -525,7 +540,7 @@ describe("factors", () => {
       expect(response.data.error).toBe(true));
     test("should contain message property", () =>
       expect(response.data).toHaveProperty("message"));
-    test("should contain message property", () =>
+    test("should contain specific message for 'Authorization header is malformed'", () =>
       expect(response.data.message).toBe("Authorization header is malformed"));
     test("should be an object result", () =>
       expect(response.data).toBeInstanceOf(Object));
@@ -535,7 +550,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2000`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -557,7 +572,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020?country=notARealCountry`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -579,7 +594,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2018`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -620,7 +635,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020?country=Australia`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -661,7 +676,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020a`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -685,7 +700,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020?country=Austral1a`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -709,7 +724,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020?limit=10`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -731,7 +746,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020?limit=-10`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -755,7 +770,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020?limit=3.14`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -779,7 +794,7 @@ describe("factors", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/factors/2020?limit=abc`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
+          headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
         })
       );
       return (response = request.resolve
@@ -805,7 +820,7 @@ describe("factors", () => {
         instance.get(
           `${REMOTE_API_URL}/factors/2020?region=Australia&limit=10`,
           {
-            headers: { Authorization: `Bearer ${TOKEN}` },
+            headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
           }
         )
       );
@@ -824,5 +839,770 @@ describe("factors", () => {
       expect(response.data).toHaveProperty("message"));
     test("should be an object result", () =>
       expect(response.data).toBeInstanceOf(Object));
+  });
+});
+
+/* ======================= Profile ======================= */
+describe("profile", () => {
+  beforeAll(async () => {
+    const request = await to.object(
+      instance.post(`${REMOTE_API_URL}/user/register`, {
+        email: EMAIL_USER_TWO,
+        password: PASSWORD_USER_TWO,
+      })
+    );
+
+    const login = await axios.post(`${REMOTE_API_URL}/user/login`, {
+      email: EMAIL_USER_TWO,
+      password: PASSWORD_USER_TWO,
+    });
+    TOKEN_USER_TWO = login.data.token;
+  });
+
+  describe("retrieval with default profile values", () => {
+    describe("with unauthenticated request for non existent user", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${uuid()}@email.com/profile`)
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+
+      test("should return status code 404", () =>
+        expect(response.status).toBe(404));
+      test("should return status text - Not Found", () =>
+        expect(response.statusText).toBe("Not Found"));
+      test("should return error with boolean of true", () =>
+        expect(response.data.error).toBe(true));
+      test("should contain message property", () =>
+        expect(response.data).toHaveProperty("message"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+    });
+
+    describe("with authenticated request for non existent user", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${uuid()}@email.com/profile`, {
+            headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+          })
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+
+      test("should return status code 404", () =>
+        expect(response.status).toBe(404));
+      test("should return status text - Not Found", () =>
+        expect(response.statusText).toBe("Not Found"));
+      test("should return error with boolean of true", () =>
+        expect(response.data.error).toBe(true));
+      test("should contain message property", () =>
+        expect(response.data).toHaveProperty("message"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+    });
+
+    describe("with unauthenticated user default profile values", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`)
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+      test("should return status code 200", () =>
+        expect(response.status).toBe(200));
+      test("should return status text - OK", () =>
+        expect(response.statusText).toBe("OK"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+      test("should return user email property", () =>
+        expect(response.data.email).toBe(EMAIL_USER_ONE));
+      test("should return null for unset firstName", () =>
+        expect(response.data.firstName).toBe(null));
+      test("should return null for unset lastName", () =>
+        expect(response.data.lastName).toBe(null));
+      test("should not return dob property", () =>
+        expect(response.data).not.toHaveProperty("dob"));
+      test("should not return address property", () =>
+        expect(response.data).not.toHaveProperty("address"));
+    });
+
+    describe("with authenticated matching user default profile values", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`, {
+            headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+          })
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+      test("should return status code 200", () =>
+        expect(response.status).toBe(200));
+      test("should return status text - OK", () =>
+        expect(response.statusText).toBe("OK"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+      test("should return user email property", () =>
+        expect(response.data.email).toBe(EMAIL_USER_ONE));
+      test("should return null for unset firstName", () =>
+        expect(response.data.firstName).toBe(null));
+      test("should return null for unset lastName", () =>
+        expect(response.data.lastName).toBe(null));
+      test("should return null for unset dob", () =>
+        expect(response.data.dob).toBe(null));
+      test("should return null for unset address", () =>
+        expect(response.data.address).toBe(null));
+    });
+
+    describe("with authenticated non-matching user default profile values", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`, {
+            headers: { Authorization: `Bearer ${TOKEN_USER_TWO}` },
+          })
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+      test("should return status code 200", () =>
+        expect(response.status).toBe(200));
+      test("should return status text - OK", () =>
+        expect(response.statusText).toBe("OK"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+      test("should return user email property", () =>
+        expect(response.data.email).toBe(EMAIL_USER_ONE));
+      test("should return null for unset firstName", () =>
+        expect(response.data.firstName).toBe(null));
+      test("should return null for unset lastName", () =>
+        expect(response.data.lastName).toBe(null));
+      test("should not return dob property", () =>
+        expect(response.data).not.toHaveProperty("dob"));
+      test("should not return address property", () =>
+        expect(response.data).not.toHaveProperty("address"));
+    });
+  });
+
+  describe("update of user profile", () => {
+    describe("with unauthenticated user", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.put(`${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`, {
+            firstName: FIRST_NAME_USER_ONE,
+            lastName: LAST_NAME_USER_ONE,
+            address: ADDRESS_USER_ONE,
+            dob: DOB_USER_ONE,
+          })
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+
+      test("should return status code 401", () =>
+        expect(response.status).toBe(401));
+      test("should return status text - Unauthorized", () =>
+        expect(response.statusText).toBe("Unauthorized"));
+      test("should return error with boolean of true", () =>
+        expect(response.data.error).toBe(true));
+      test("should contain message property", () =>
+        expect(response.data).toHaveProperty("message"));
+    });
+
+    describe("with authenticated non-matching user", () => {
+      beforeAll(async () => {
+        const login = await axios.post(`${REMOTE_API_URL}/user/login`, {
+          email: EMAIL_USER_TWO,
+          password: PASSWORD_USER_TWO,
+        });
+        TOKEN_USER_TWO = login.data.token;
+
+        const request = await to.object(
+          instance.put(
+            `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+            {
+              firstName: FIRST_NAME_USER_ONE,
+              lastName: LAST_NAME_USER_ONE,
+              address: ADDRESS_USER_ONE,
+              dob: DOB_USER_ONE,
+            },
+            {
+              headers: { Authorization: `Bearer ${TOKEN_USER_TWO}` },
+            }
+          )
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+
+      test("should return status code 403", () =>
+        expect(response.status).toBe(403));
+      test("should return status text - Forbidden", () =>
+        expect(response.statusText).toBe("Forbidden"));
+      test("should return error with boolean of true", () =>
+        expect(response.data.error).toBe(true));
+      test("should contain message property", () =>
+        expect(response.data).toHaveProperty("message"));
+    });
+
+    describe("with authenticated matching user", () => {
+      beforeAll(async () => {
+        const login = await axios.post(`${REMOTE_API_URL}/user/login`, {
+          email: EMAIL_USER_ONE,
+          password: PASSWORD_USER_ONE,
+        });
+        TOKEN_USER_ONE = login.data.token;
+      });
+
+      describe("with missing body keys", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {},
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return specific message for 'Request body incomplete, firstName, lastName, dob and address are required'", () =>
+          expect(response.data.message).toBe(
+            "Request body incomplete, firstName, lastName, dob and address are required"
+          ));
+      });
+
+      describe("with invalid firstName", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: 123,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: DOB_USER_ONE,
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Request body invalid, firstName, lastName and address must be strings only'", () =>
+          expect(response.data.message).toBe(
+            "Request body invalid, firstName, lastName and address must be strings only"
+          ));
+      });
+
+      describe("with invalid lastName", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: 987,
+                address: ADDRESS_USER_ONE,
+                dob: DOB_USER_ONE,
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Request body invalid, firstName, lastName and address must be strings only'", () =>
+          expect(response.data.message).toBe(
+            "Request body invalid, firstName, lastName and address must be strings only"
+          ));
+      });
+
+      describe("with invalid address", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: true,
+                dob: DOB_USER_ONE,
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Request body invalid, firstName, lastName and address must be strings only'", () =>
+          expect(response.data.message).toBe(
+            "Request body invalid, firstName, lastName and address must be strings only"
+          ));
+      });
+
+      describe("with invalid date format", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: new Date().toISOString(),
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Invalid input, dob must be a real date in format YYYY-MM-DD'", () =>
+          expect(response.data.message).toBe(
+            "Invalid input, dob must be a real date in format YYYY-MM-DD"
+          ));
+      });
+
+      describe("with valid formatted non-real date", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: new Date().toISOString(),
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Invalid input, dob must be a real date in format YYYY-MM-DD'", () =>
+          expect(response.data.message).toBe(
+            "Invalid input, dob must be a real date in format YYYY-MM-DD"
+          ));
+      });
+
+      describe("with valid formatted non-real date (out of bounds check)", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: "2021-13-32",
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Invalid input, dob must be a real date in format YYYY-MM-DD'", () =>
+          expect(response.data.message).toBe(
+            "Invalid input, dob must be a real date in format YYYY-MM-DD"
+          ));
+      });
+
+      describe("with valid formatted non-real date (Javascript date rollover check)", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: "2021-04-31",
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Invalid input, dob must be a real date in format YYYY-MM-DD'", () =>
+          expect(response.data.message).toBe(
+            "Invalid input, dob must be a real date in format YYYY-MM-DD"
+          ));
+      });
+
+      describe("with valid formatted non-real date (non leap-year check)", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: "2021-02-29",
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+      });
+
+      describe("with valid date in the future", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: "2031-05-31",
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 400", () =>
+          expect(response.status).toBe(400));
+        test("should return status text - Bad Request", () =>
+          expect(response.statusText).toBe("Bad Request"));
+        test("should return error with boolean of true", () =>
+          expect(response.data.error).toBe(true));
+        test("should contain message property", () =>
+          expect(response.data).toHaveProperty("message"));
+        test("should return a specific message for 'Invalid input, dob must be a date in the past'", () =>
+          expect(response.data.message).toBe(
+            "Invalid input, dob must be a date in the past"
+          ));
+      });
+
+      describe("with valid date in the past", () => {
+        beforeAll(async () => {
+          const request = await to.object(
+            instance.put(
+              `${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`,
+              {
+                firstName: FIRST_NAME_USER_ONE,
+                lastName: LAST_NAME_USER_ONE,
+                address: ADDRESS_USER_ONE,
+                dob: DOB_USER_ONE,
+              },
+              {
+                headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+              }
+            )
+          );
+          return (response = request.resolve
+            ? request.resolve
+            : request.reject.response);
+        });
+
+        test("should return status code 200", () =>
+          expect(response.status).toBe(200));
+        test("should return status text - OK", () =>
+          expect(response.statusText).toBe("OK"));
+        test("should be an object result", () =>
+          expect(response.data).toBeInstanceOf(Object));
+        test("should return user email property", () =>
+          expect(response.data.email).toBe(EMAIL_USER_ONE));
+        test("should return updated firstName", () =>
+          expect(response.data.firstName).toBe(FIRST_NAME_USER_ONE));
+        test("should return updated lastName", () =>
+          expect(response.data.lastName).toBe(LAST_NAME_USER_ONE));
+        test("should return updated dob", () =>
+          expect(response.data.dob).toBe(DOB_USER_ONE));
+        test("should return updated address", () =>
+          expect(response.data.address).toBe(ADDRESS_USER_ONE));
+      });
+    });
+  });
+
+  describe("retrieval after update of user profile", () => {
+    describe("with unauthenticated user updated profile values", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`)
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+      test("should return status code 200", () =>
+        expect(response.status).toBe(200));
+      test("should return status text - OK", () =>
+        expect(response.statusText).toBe("OK"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+      test("should return user email property", () =>
+        expect(response.data.email).toBe(EMAIL_USER_ONE));
+      test("should return updated firstName", () =>
+        expect(response.data.firstName).toBe(FIRST_NAME_USER_ONE));
+      test("should return updated lastName", () =>
+        expect(response.data.lastName).toBe(LAST_NAME_USER_ONE));
+      test("should not return dob property", () =>
+        expect(response.data).not.toHaveProperty("dob"));
+      test("should not return address property", () =>
+        expect(response.data).not.toHaveProperty("address"));
+    });
+
+    describe("with authenticated matching user updated profile values", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`, {
+            headers: { Authorization: `Bearer ${TOKEN_USER_ONE}` },
+          })
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+      test("should return status code 200", () =>
+        expect(response.status).toBe(200));
+      test("should return status text - OK", () =>
+        expect(response.statusText).toBe("OK"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+      test("should return user email property", () =>
+        expect(response.data.email).toBe(EMAIL_USER_ONE));
+      test("should return updated firstName", () =>
+        expect(response.data.firstName).toBe(FIRST_NAME_USER_ONE));
+      test("should return updated lastName", () =>
+        expect(response.data.lastName).toBe(LAST_NAME_USER_ONE));
+      test("should return updated dob", () =>
+        expect(response.data.dob).toBe(DOB_USER_ONE));
+      test("should return updated address", () =>
+        expect(response.data.address).toBe(ADDRESS_USER_ONE));
+    });
+
+    describe("with authenticated non-matching user updated profile values", () => {
+      beforeAll(async () => {
+        const request = await to.object(
+          instance.get(`${REMOTE_API_URL}/user/${EMAIL_USER_ONE}/profile`, {
+            headers: { Authorization: `Bearer ${TOKEN_USER_TWO}` },
+          })
+        );
+
+        return (response = request.resolve
+          ? request.resolve
+          : request.reject.response);
+      });
+      test("should return status code 200", () =>
+        expect(response.status).toBe(200));
+      test("should return status text - OK", () =>
+        expect(response.statusText).toBe("OK"));
+      test("should be an object result", () =>
+        expect(response.data).toBeInstanceOf(Object));
+      test("should return user email property", () =>
+        expect(response.data.email).toBe(EMAIL_USER_ONE));
+      test("should return updated firstName", () =>
+        expect(response.data.firstName).toBe(FIRST_NAME_USER_ONE));
+      test("should return updated lastName", () =>
+        expect(response.data.lastName).toBe(LAST_NAME_USER_ONE));
+      test("should not return dob property", () =>
+        expect(response.data).not.toHaveProperty("dob"));
+      test("should not return address property", () =>
+        expect(response.data).not.toHaveProperty("address"));
+    });
+  });
+});
+
+/* ======================= Misc ======================= */
+describe("Miscellaneous", () => {
+  describe("with non-existent route", () => {
+    beforeAll(async () => {
+      const request = await to.object(
+        instance.get(`${REMOTE_API_URL}/${uuid()}`)
+      );
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("return a status of 404", () => expect(response.status).toBe(404));
+    test("should return status text - Not Found", () =>
+      expect(response.statusText).toBe("Not Found"));
+  });
+
+  describe("with swagger docs route", () => {
+    beforeAll(async () => {
+      const request = await to.object(instance.get(`${REMOTE_API_URL}/`));
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("return a status of 200", () => expect(response.status).toBe(200));
+    test("should return status text - OK", () =>
+      expect(response.statusText).toBe("OK"));
+    test("should return Swagger UI", () =>
+      expect(response.data).toContain("Swagger UI"));
+  });
+
+  describe("with cors header", () => {
+    beforeAll(async () => {
+      const request = await to.object(instance.get(`${REMOTE_API_URL}/`));
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("return a status of 200", () => expect(response.status).toBe(200));
+    test("should return status text - OK", () =>
+      expect(response.statusText).toBe("OK"));
+    test("should return access-control-allow-origin in headers", () =>
+      expect(response.headers).toHaveProperty("access-control-allow-origin"));
+  });
+
+  describe("with supressed x-powered-by header", () => {
+    beforeAll(async () => {
+      const request = await to.object(instance.get(`${REMOTE_API_URL}/`));
+      return (response = request.resolve
+        ? request.resolve
+        : request.reject.response);
+    });
+
+    test("return a status of 200", () => expect(response.status).toBe(200));
+    test("should return status text - OK", () =>
+      expect(response.statusText).toBe("OK"));
+    test("should not x-powered-by header property", () =>
+      expect(response.headers).not.toHaveProperty("x-powered-by"));
   });
 });
