@@ -107,7 +107,7 @@ describe("rankings", () => {
       expect(response.data).toBeInstanceOf(Object));
   });
 
-  describe("year with lets in year format", () => {
+  describe("year with letters in year format", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/rankings?year=twentytwenty`)
@@ -225,7 +225,7 @@ describe("rankings", () => {
       expect(response.data[0].year).toBe(2015));
   });
 
-  describe("with country that doesn't exist", () => {
+  describe("with year that doesn't exist", () => {
     beforeAll(async () => {
       const request = await to.object(
         instance.get(`${REMOTE_API_URL}/rankings?year=2000`)
